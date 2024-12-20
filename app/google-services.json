@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "989985710945",
+    "project_id": "board-93cbe",
+    "storage_bucket": "board-93cbe.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:989985710945:android:9d145491c053bad83c5b20",
+        "android_client_info": {
+          "package_name": "com.lion.boardproject"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCehGevwlh7RUreRo3jR3R6NlUW4IErh5U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

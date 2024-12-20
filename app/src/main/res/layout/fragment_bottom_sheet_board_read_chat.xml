@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <data>
+        <variable
+            name="bottomSheetBoardReadChatViewModel"
+            type="com.lion.boardproject.viewmodel.BottomSheetBoardReadChatViewModel" />
+    </data>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        tools:context=".fragment.BoardChatFragment"
+        android:padding="6dp">
+
+        <com.google.android.material.bottomsheet.BottomSheetDragHandleView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal" />
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="댓글"
+            android:gravity="center"
+            android:textAppearance="@style/TextAppearance.AppCompat.Large" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerViewBoardChat"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <!-- 댓글 입력란 및 버튼 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="16dp"
+            android:gravity="center_vertical">
+
+            <!-- Text Input Layout for Comment -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/textFieldUserJoinStep1Id"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:hint="댓글을 입력하세요">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/editTextCommentBottomSheetBoardReadChat"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="text"
+                    android:singleLine="false"
+                    android:maxLines="3"
+                    android:minLines="1"
+                    android:text="@={bottomSheetBoardReadChatViewModel.editTextCommentBottomSheetBoardReadChat}" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Submit Button for Comment -->
+            <Button
+                android:id="@+id/buttonSubmitCommentBottomSheetBoardReadChat"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="입력"
+                android:textColor="@android:color/white"
+                android:backgroundTint="?attr/colorPrimary"
+                android:layout_marginStart="16dp"
+                android:onClick="@{()->bottomSheetBoardReadChatViewModel.onclickInputComment()}" />
+        </LinearLayout>
+
+    </LinearLayout>
+</layout>
+
+
