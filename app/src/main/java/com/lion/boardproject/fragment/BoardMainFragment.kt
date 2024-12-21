@@ -270,3 +270,4 @@ enum class BoardSubFragmentName(var number:Int, var str:String){
     // 사용자 정보 수정 화면
     USER_MODIFY_FRAGMENT(5, "UserModifyFragment"),
 }
+

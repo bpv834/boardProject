@@ -87,6 +87,7 @@ class BoardReadFragment(val boardMainFragment: BoardMainFragment) : Fragment() {
                         }
                         builder.show()
                     }
+                    // 채팅창 메뉴
                     R.id.menuItemBoardReadChat->{
                         val bottomSheetFragment = BottomSheetBoardReadChatFragment(this@BoardReadFragment)
                         bottomSheetFragment.show(boardActivity.supportFragmentManager,"bottomSheetBoardReadChatFragment")

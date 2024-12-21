@@ -167,8 +167,11 @@ class BoardActivity : AppCompatActivity() {
     }
     // 키보드를 내리는 메서드
     fun hideSoftInput(){
+        Log.d("test300","hideKeyBoard?")
         // 포커스가 있는 뷰가 있다면
         if(currentFocus != null){
+            Log.d("test300","hideKeyBoard!=null")
+
             // 입력을 관리하는 매니저
             val inputManager = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
             // 키보드를 내린다.

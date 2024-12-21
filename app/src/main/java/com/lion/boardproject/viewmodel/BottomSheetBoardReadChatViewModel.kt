@@ -10,8 +10,9 @@ class BottomSheetBoardReadChatViewModel(val bottomSheetBoardReadChatFragment: Bo
 
     // buttonSubmitCommentBottomSheetBoardReadChat - onClick
     fun onclickInputComment() {
-        Log.d("test200","onClick")
+        /*Log.d("test200","onClick")*/
         bottomSheetBoardReadChatFragment.proBoardWriteSubmit()
+        editTextCommentBottomSheetBoardReadChat.value=""
     }
 }
 
