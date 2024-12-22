@@ -1,5 +1,6 @@
 package com.lion.boardproject.model
 
+import com.google.firebase.Timestamp
 import com.lion.boardproject.util.ReplyState
 import com.lion.boardproject.vo.ReplyVO
 
@@ -13,7 +14,7 @@ class ReplyModel {
     // 댓글이 달린 글 구분 값
     var replyBoardId = ""
     // 시간
-    var replyTimeStamp = 0L
+    var replyTimeStamp: Timestamp? = null
     // 상태
     var replyState = ReplyState.REPLY_STATE_NORMAL
 

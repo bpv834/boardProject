@@ -1,5 +1,6 @@
 package com.lion.boardproject.fragment
 
+
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -9,18 +10,18 @@ import android.view.inputmethod.InputMethodManager
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.divider.MaterialDividerItemDecoration
+import com.google.firebase.Timestamp
 import com.lion.boardproject.BoardActivity
 import com.lion.boardproject.R
 import com.lion.boardproject.databinding.FragmentBottomSheetBoardReadChatBinding
 import com.lion.boardproject.databinding.RowChatBinding
-import com.lion.boardproject.model.BoardModel
 import com.lion.boardproject.model.ReplyModel
 import com.lion.boardproject.service.BoardService
 import com.lion.boardproject.service.ReplyService
+import com.lion.boardproject.service.UserService
 import com.lion.boardproject.util.ReplyState
 import com.lion.boardproject.viewmodel.BottomSheetBoardReadChatViewModel
 import com.lion.boardproject.viewmodel.RowChatViewModel
@@ -29,12 +30,14 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
-import java.util.Date
 import java.util.Locale
 
-class BottomSheetBoardReadChatFragment(val boardReadFragment: BoardReadFragment) : BottomSheetDialogFragment() {
+
+class BottomSheetBoardReadChatFragment(val boardReadFragment: BoardReadFragment) :
+    BottomSheetDialogFragment() {
     // 메인 RecyclerView를 구성하기 위해 사용할 리스트
     var recyclerViewList = mutableListOf<ReplyModel>()
+
     // 바텀시트 사이즈 조절
     override fun onStart() {
         super.onStart() // 부모 클래스의 onStart()를 호출하여 정상적인 라이프사이클 동작을 보장합니다.
@@ -49,12 +52,21 @@ class BottomSheetBoardReadChatFragment(val boardReadFragment: BoardReadFragment)
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        fragmentBottomSheetBoardReadChatBinding = DataBindingUtil.inflate(inflater,R.layout.fragment_bottom_sheet_board_read_chat,container,false)
-        fragmentBottomSheetBoardReadChatBinding.bottomSheetBoardReadChatViewModel = BottomSheetBoardReadChatViewModel(this@BottomSheetBoardReadChatFragment)
-        fragmentBottomSheetBoardReadChatBinding.lifecycleOwner = this@BottomSheetBoardReadChatFragment
+        fragmentBottomSheetBoardReadChatBinding = DataBindingUtil.inflate(
+            inflater,
+            R.layout.fragment_bottom_sheet_board_read_chat,
+            container,
+            false
+        )
+        fragmentBottomSheetBoardReadChatBinding.bottomSheetBoardReadChatViewModel =
+            BottomSheetBoardReadChatViewModel(this@BottomSheetBoardReadChatFragment)
+        fragmentBottomSheetBoardReadChatBinding.lifecycleOwner =
+            this@BottomSheetBoardReadChatFragment
 
-        fragmentRowChatBinding = DataBindingUtil.inflate(inflater,R.layout.row_chat,container,false)
-        fragmentRowChatBinding.rowChatViewModel = RowChatViewModel(this@BottomSheetBoardReadChatFragment)
+        fragmentRowChatBinding =
+            DataBindingUtil.inflate(inflater, R.layout.row_chat, container, false)
+        fragmentRowChatBinding.rowChatViewModel =
+            RowChatViewModel(this@BottomSheetBoardReadChatFragment)
         fragmentRowChatBinding.lifecycleOwner = this@BottomSheetBoardReadChatFragment
 
         boardActivity = activity as BoardActivity
@@ -69,15 +81,15 @@ class BottomSheetBoardReadChatFragment(val boardReadFragment: BoardReadFragment)
     }
 
     // 데이터를 가져와 MainRecyclerView를 갱신하는 메서드
-    fun refreshBottomSheetRecyclerView(){
+    fun refreshBottomSheetRecyclerView() {
         CoroutineScope(Dispatchers.Main).launch {
-            val work1 = async(Dispatchers.IO){
+            val work1 = async(Dispatchers.IO) {
                 ReplyService.gettingReplyListData(boardReadFragment.boardDocumentId)
             }
             recyclerViewList = work1.await()
 
             recyclerViewList.forEach {
-                Log.d("test300","${it.toString()}")
+                Log.d("test300", "${it.toString()}")
 
             }
 
@@ -94,7 +106,7 @@ class BottomSheetBoardReadChatFragment(val boardReadFragment: BoardReadFragment)
                     /*Log.d("test200","hasFocus")*/
                     // 사이즈를 확장
                     expandBottomSheetSize()
-                }else{
+                } else {
                     // 포커스를 풀면 사이즈를 축소
                     customSheetSize(dialog as BottomSheetDialog)
                 }
@@ -103,10 +115,11 @@ class BottomSheetBoardReadChatFragment(val boardReadFragment: BoardReadFragment)
     }
 
     // 댓글 작성 완료 처리 메서드
-    fun proBoardWriteSubmit(){
+    fun proBoardWriteSubmit() {
         fragmentBottomSheetBoardReadChatBinding.apply {
 
-            val comment = bottomSheetBoardReadChatViewModel?.editTextCommentBottomSheetBoardReadChat?.value!!
+            val comment =
+                bottomSheetBoardReadChatViewModel?.editTextCommentBottomSheetBoardReadChat?.value!!
 
             CoroutineScope(Dispatchers.Main).launch {
 
@@ -115,11 +128,11 @@ class BottomSheetBoardReadChatFragment(val boardReadFragment: BoardReadFragment)
                 replyModel.replyNickName = boardActivity.loginUserNickName
                 replyModel.replyText = comment
                 replyModel.replyBoardId = boardReadFragment.boardDocumentId
-                replyModel.replyTimeStamp= System.nanoTime()
+                replyModel.replyTimeStamp = Timestamp.now()
                 replyModel.replyState = ReplyState.REPLY_STATE_NORMAL
                 // 저장한다.
 
-                val work1 = async(Dispatchers.IO){
+                val work1 = async(Dispatchers.IO) {
                     ReplyService.addBoardReplyData(replyModel)
                 }
                 val documentId = work1.await()
@@ -131,22 +144,59 @@ class BottomSheetBoardReadChatFragment(val boardReadFragment: BoardReadFragment)
     }
 
 
+/*    // 글 삭제 처리 메서드
+    fun proBoardDelete(){
+        CoroutineScope(Dispatchers.Main).launch {
+            // 만약 첨부 이미지가 있다면 삭제한다.
+            if(boardModel.boardFileName != "none"){
+                val work1 = async(Dispatchers.IO){
+                    BoardService.removeImageFile(boardModel.boardFileName)
+                }
+                work1.join()
+            }
+            // 글 정보를 삭제한다.
+            val work2 = async(Dispatchers.IO){
+                BoardService.deleteBoardData(boardDocumentId)
+            }
+            work2.join()
+            // 글 목록 화면으로 이동한다.
+            boardMainFragment.removeFragment(BoardSubFragmentName.BOARD_READ_FRAGMENT)
+        }
+    }*/
+
+    // 댓글 삭제 메서드
+    fun deleteReplyData(boardId: String, replyDocId: String) {
+        CoroutineScope(Dispatchers.Main).launch {
+            Log.d("test300","coroution")
+            val work1 = async(Dispatchers.IO) {
+                ReplyService.deleteBoardReplyData(boardId, replyDocId)
+            }
+            work1.join()
+            refreshBottomSheetRecyclerView()
+
+        }
+    }
+
+
     // RecyclerView를 구성하는 메서드
-    fun settingRecyclerView(){
+    fun settingRecyclerView() {
         fragmentBottomSheetBoardReadChatBinding.apply {
             // 어뎁터
             recyclerViewBoardChat.adapter = RecyclerViewMainAdapter()
             // LayoutManager
             recyclerViewBoardChat.layoutManager = LinearLayoutManager(boardActivity)
             // 구분선
-            val deco = MaterialDividerItemDecoration(boardActivity, MaterialDividerItemDecoration.VERTICAL)
+            val deco =
+                MaterialDividerItemDecoration(boardActivity, MaterialDividerItemDecoration.VERTICAL)
             recyclerViewBoardChat.addItemDecoration(deco)
         }
     }
+
     // 바텀시트 사이즈를 2/3 크기로 조절하여, 입력텍스트와 리사이클러뷰를 볼수있게 레이아웃을 짠다
-    fun customSheetSize(dialog : BottomSheetDialog) {
+    fun customSheetSize(dialog: BottomSheetDialog) {
         // BottomSheetDialog 내부에서 실제 바텀시트 뷰를 ID를 통해 찾아냅니다.
-        val bottomSheet = dialog.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)
+        val bottomSheet =
+            dialog.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)
 
         // bottomSheet가 null이 아닌 경우에만 실행되는 블록
         bottomSheet?.apply {
@@ -173,7 +223,8 @@ class BottomSheetBoardReadChatFragment(val boardReadFragment: BoardReadFragment)
     private fun expandBottomSheetSize() {
         Log.d("test200", "increase")
         dialog?.let {
-            val bottomSheet = it.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)
+            val bottomSheet =
+                it.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)
 
             // 화면의 전체 높이를 가져옵니다.
             val displayMetrics = resources.displayMetrics
@@ -183,10 +234,10 @@ class BottomSheetBoardReadChatFragment(val boardReadFragment: BoardReadFragment)
             bottomSheet.layoutParams.height = screenHeight // 바텀시트의 레이아웃 높이를 설정합니다.
             bottomSheet.requestLayout() // 레이아웃 변경 사항을 적용합니다.
 
-   /*         // BottomSheetBehavior와 연결
-                val behavior = BottomSheetBehavior.from(bottomSheet)
-                // BottomSheetBehavior 상태를 확장으로 설정
-                behavior.state = BottomSheetBehavior.STATE_EXPANDED*/
+            /*         // BottomSheetBehavior와 연결
+                         val behavior = BottomSheetBehavior.from(bottomSheet)
+                         // BottomSheetBehavior 상태를 확장으로 설정
+                         behavior.state = BottomSheetBehavior.STATE_EXPANDED*/
         }
     }
 
@@ -205,16 +256,37 @@ class BottomSheetBoardReadChatFragment(val boardReadFragment: BoardReadFragment)
 
 
     // RecyclerView의 어뎁터
-    inner class RecyclerViewMainAdapter : RecyclerView.Adapter<RecyclerViewMainAdapter.ViewHolderMain>(){
+    inner class RecyclerViewMainAdapter :
+        RecyclerView.Adapter<RecyclerViewMainAdapter.ViewHolderMain>() {
         // ViewHolder
-        inner class ViewHolderMain(val rowBoardChatBinding: RowChatBinding) : RecyclerView.ViewHolder(rowBoardChatBinding.root)
+        inner class ViewHolderMain(val rowBoardChatBinding: RowChatBinding) :
+            RecyclerView.ViewHolder(rowBoardChatBinding.root)
+
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolderMain {
 
-            val rowBoardChatBinding = DataBindingUtil.inflate<RowChatBinding>(layoutInflater,R.layout.row_chat,parent,false)
+            val rowBoardChatBinding = DataBindingUtil.inflate<RowChatBinding>(
+                layoutInflater,
+                R.layout.row_chat,
+                parent,
+                false
+            )
 
             val viewHolderMain = ViewHolderMain(rowBoardChatBinding)
 
-            viewHolderMain.rowBoardChatBinding.root.setOnClickListener {  }
+            // 답글 기능 넣기
+            viewHolderMain.rowBoardChatBinding.root.setOnClickListener { }
+
+            viewHolderMain.rowBoardChatBinding.root.setOnLongClickListener {
+                if (recyclerViewList[viewHolderMain.adapterPosition].replyNickName == boardActivity.loginUserNickName) {
+                    boardActivity.showMessageDialog("삭제 하시겠습니까?", "삭제 시 복구가 불가능합니다.", "삭제") {
+                        deleteReplyData(
+                            recyclerViewList[viewHolderMain.adapterPosition].replyBoardId,
+                            recyclerViewList[viewHolderMain.adapterPosition].replyDocumentId
+                        )
+                    }
+                }
+                true
+            }
 
             return viewHolderMain
         }
@@ -224,13 +296,19 @@ class BottomSheetBoardReadChatFragment(val boardReadFragment: BoardReadFragment)
         }
 
         override fun onBindViewHolder(holder: ViewHolderMain, position: Int) {
-            holder.rowBoardChatBinding.textViewNickRowChat.text = recyclerViewList[position].replyNickName
-            holder.rowBoardChatBinding.textViewContentRowChat.text = recyclerViewList[position].replyText
-           // holder.rowBoardChatBinding.textViewDateRowChat.text =convertNanoToDateString(recyclerViewList[position].replyTimeStamp)
+            holder.rowBoardChatBinding.textViewNickRowChat.text =
+                recyclerViewList[position].replyNickName
+            holder.rowBoardChatBinding.textViewContentRowChat.text =
+                recyclerViewList[position].replyText
+            val timeStamp = recyclerViewList[position].replyTimeStamp
+
+            // 원하는 날짜 형식으로 포맷팅
+            val dateFormat = SimpleDateFormat("yy.MM.dd HH:mm", Locale.getDefault())
+            val formattedDate = dateFormat.format(timeStamp!!.toDate())
+
+            holder.rowBoardChatBinding.textViewDateRowChat.text = formattedDate
         }
     }
-
-
 
 
 }

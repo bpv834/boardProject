@@ -1,7 +1,10 @@
 package com.lion.boardproject.vo
 
+import com.google.firebase.Timestamp
+import com.google.type.DateTime
 import com.lion.boardproject.model.ReplyModel
 import com.lion.boardproject.util.ReplyState
+
 
 class ReplyVO {
     // 댓글 작성자 닉네임
@@ -11,7 +14,7 @@ class ReplyVO {
     // 댓글이 달린 글 구분 값
     var replyBoardId = ""
     // 시간
-    var replyTimeStamp = 0L
+    var replyTimeStamp: Timestamp? = null
     // 상태
     var replyState = 0
 

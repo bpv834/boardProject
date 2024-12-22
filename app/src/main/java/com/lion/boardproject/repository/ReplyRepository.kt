@@ -57,10 +57,15 @@ class ReplyRepository {
 
         // 댓글 삭제 메서드
         suspend fun deleteReplyData(boardId: String, replyId: String) {
+            Log.d("test300","repository : $boardId,$replyId")
+
+
             val firestore = FirebaseFirestore.getInstance()
             val replyDocument =
                 firestore.collection("BoardData").document(boardId).collection("reply")
                     .document(replyId) // 특정 댓글 문서에 접근
+            Log.d("test300","repository, replyDocId  : ${replyDocument.id}")
+
             replyDocument.delete().await()
 
         }

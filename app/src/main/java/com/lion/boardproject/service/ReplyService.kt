@@ -43,5 +43,12 @@ class ReplyService {
 
         }
 
+        // 댓글 삭제
+        suspend fun deleteBoardReplyData(boardId : String, replyDocId: String){
+            Log.d("test300","service : $boardId,$replyDocId")
+
+            ReplyRepository.deleteReplyData(boardId,replyDocId)
+        }
+
     }
 }
