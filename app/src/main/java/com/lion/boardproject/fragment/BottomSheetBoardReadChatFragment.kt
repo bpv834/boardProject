@@ -17,17 +17,24 @@ import com.lion.boardproject.BoardActivity
 import com.lion.boardproject.R
 import com.lion.boardproject.databinding.FragmentBottomSheetBoardReadChatBinding
 import com.lion.boardproject.databinding.RowChatBinding
+import com.lion.boardproject.model.BoardModel
 import com.lion.boardproject.model.ReplyModel
+import com.lion.boardproject.service.BoardService
 import com.lion.boardproject.service.ReplyService
 import com.lion.boardproject.util.ReplyState
 import com.lion.boardproject.viewmodel.BottomSheetBoardReadChatViewModel
+import com.lion.boardproject.viewmodel.RowChatViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class BottomSheetBoardReadChatFragment(val boardReadFragment: BoardReadFragment) : BottomSheetDialogFragment() {
-
+    // 메인 RecyclerView를 구성하기 위해 사용할 리스트
+    var recyclerViewList = mutableListOf<ReplyModel>()
     // 바텀시트 사이즈 조절
     override fun onStart() {
         super.onStart() // 부모 클래스의 onStart()를 호출하여 정상적인 라이프사이클 동작을 보장합니다.
@@ -37,6 +44,7 @@ class BottomSheetBoardReadChatFragment(val boardReadFragment: BoardReadFragment)
 
     lateinit var boardActivity: BoardActivity
     lateinit var fragmentBottomSheetBoardReadChatBinding: FragmentBottomSheetBoardReadChatBinding
+    lateinit var fragmentRowChatBinding: RowChatBinding
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -45,14 +53,38 @@ class BottomSheetBoardReadChatFragment(val boardReadFragment: BoardReadFragment)
         fragmentBottomSheetBoardReadChatBinding.bottomSheetBoardReadChatViewModel = BottomSheetBoardReadChatViewModel(this@BottomSheetBoardReadChatFragment)
         fragmentBottomSheetBoardReadChatBinding.lifecycleOwner = this@BottomSheetBoardReadChatFragment
 
+        fragmentRowChatBinding = DataBindingUtil.inflate(inflater,R.layout.row_chat,container,false)
+        fragmentRowChatBinding.rowChatViewModel = RowChatViewModel(this@BottomSheetBoardReadChatFragment)
+        fragmentRowChatBinding.lifecycleOwner = this@BottomSheetBoardReadChatFragment
+
         boardActivity = activity as BoardActivity
         // 바텀시트 크기 조절, 포커스에 따라 조절하기
         settingEditTextCommentBottomSheetBoardReadChat()
         // 리사이클러뷰 세팅
         settingRecyclerView()
+        // 리스트 세팅
+        refreshBottomSheetRecyclerView()
         return fragmentBottomSheetBoardReadChatBinding.root
 
     }
+
+    // 데이터를 가져와 MainRecyclerView를 갱신하는 메서드
+    fun refreshBottomSheetRecyclerView(){
+        CoroutineScope(Dispatchers.Main).launch {
+            val work1 = async(Dispatchers.IO){
+                ReplyService.gettingReplyListData(boardReadFragment.boardDocumentId)
+            }
+            recyclerViewList = work1.await()
+
+            recyclerViewList.forEach {
+                Log.d("test300","${it.toString()}")
+
+            }
+
+            fragmentBottomSheetBoardReadChatBinding.recyclerViewBoardChat.adapter?.notifyDataSetChanged()
+        }
+    }
+
 
     // 에딧텍스트 포커스에 따라 바텀시트 사이즈를 결정
     fun settingEditTextCommentBottomSheetBoardReadChat() {
@@ -96,7 +128,6 @@ class BottomSheetBoardReadChatFragment(val boardReadFragment: BoardReadFragment)
                 hideKeyboardAndClearFocus()
             }
         }
-
     }
 
 
@@ -189,14 +220,17 @@ class BottomSheetBoardReadChatFragment(val boardReadFragment: BoardReadFragment)
         }
 
         override fun getItemCount(): Int {
-            return 30
+            return recyclerViewList.size
         }
 
         override fun onBindViewHolder(holder: ViewHolderMain, position: Int) {
-            holder.rowBoardChatBinding.textViewNickRowChat.text = "tempList1[position]"
-            holder.rowBoardChatBinding.textViewContentRowChat.text = "tempList2[position]"
+            holder.rowBoardChatBinding.textViewNickRowChat.text = recyclerViewList[position].replyNickName
+            holder.rowBoardChatBinding.textViewContentRowChat.text = recyclerViewList[position].replyText
+           // holder.rowBoardChatBinding.textViewDateRowChat.text =convertNanoToDateString(recyclerViewList[position].replyTimeStamp)
         }
     }
+
+
 
 
 }

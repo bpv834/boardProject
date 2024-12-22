@@ -3,9 +3,6 @@ package com.lion.boardproject.repository
 import android.util.Log
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
-import com.lion.boardproject.model.UserModel
-import com.lion.boardproject.util.BoardType
-import com.lion.boardproject.vo.BoardVO
 import com.lion.boardproject.vo.ReplyVO
 import kotlinx.coroutines.tasks.await
 
@@ -26,7 +23,7 @@ class ReplyRepository {
                         .await()
 
                 // 반환할 리스트
-                val resultList = mutableListOf<Map<String, *>>()
+                val resultMapList = mutableListOf<Map<String, *>>()
 
                 // 데이터 변환 및 추가
                 result.forEach { document ->
@@ -36,9 +33,9 @@ class ReplyRepository {
                         // 데이터를 가지고 있는 객체
                         "replyVO" to document.toObject(ReplyVO::class.java)
                     )
-                    resultList.add(map)
+                    resultMapList.add(map)
                 }
-                resultList
+                resultMapList
             } catch (e: Exception) {
                 e.printStackTrace()
                 Log.d("test100","error남")
