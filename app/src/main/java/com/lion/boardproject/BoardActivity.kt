@@ -165,21 +165,27 @@ class BoardActivity : AppCompatActivity() {
             inputManager.showSoftInput(view, 0)
         }
     }
-    // 키보드를 내리는 메서드
-    fun hideSoftInput(){
-        Log.d("test300","hideKeyBoard?")
-        // 포커스가 있는 뷰가 있다면
-        if(currentFocus != null){
-            Log.d("test300","hideKeyBoard!=null")
+    fun hideSoftInput() {
+        Log.d("test300", "hideKeyBoard?")
 
-            // 입력을 관리하는 매니저
+        // 포커스가 있는 뷰 확인
+        val currentFocusedView = currentFocus
+
+        if (currentFocusedView != null) {
+            Log.d("test300", "Focused View: ${currentFocusedView.javaClass.simpleName}")
             val inputManager = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
-            // 키보드를 내린다.
-            inputManager.hideSoftInputFromWindow(currentFocus?.windowToken, 0)
-            // 포커스를 해제한다.
-            currentFocus?.clearFocus()
+
+            // 키보드 숨기기
+            val result = inputManager.hideSoftInputFromWindow(currentFocusedView.windowToken, 0)
+            Log.d("test300", "Keyboard Hide Result: $result") // 숨김 결과 확인
+
+            // 포커스 해제
+            currentFocusedView.clearFocus()
+        } else {
+            Log.d("test300", "No Focused View Found")
         }
     }
+
 
 
     // 이미지를 회전시키는 메서드

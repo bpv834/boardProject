@@ -5,6 +5,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -45,17 +46,28 @@ class BottomSheetBoardReadChatFragment(val boardReadFragment: BoardReadFragment)
         fragmentBottomSheetBoardReadChatBinding.lifecycleOwner = this@BottomSheetBoardReadChatFragment
 
         boardActivity = activity as BoardActivity
-
-        fragmentBottomSheetBoardReadChatBinding.editTextCommentBottomSheetBoardReadChat.setOnFocusChangeListener { _, hasFocus ->
-            if (hasFocus) {
-                Log.d("test200","hasFocus")
-                expandBottomSheetSize()
-            }
-        }
-
+        // 바텀시트 크기 조절, 포커스에 따라 조절하기
+        settingEditTextCommentBottomSheetBoardReadChat()
+        // 리사이클러뷰 세팅
         settingRecyclerView()
         return fragmentBottomSheetBoardReadChatBinding.root
 
+    }
+
+    // 에딧텍스트 포커스에 따라 바텀시트 사이즈를 결정
+    fun settingEditTextCommentBottomSheetBoardReadChat() {
+        fragmentBottomSheetBoardReadChatBinding.apply {
+            editTextCommentBottomSheetBoardReadChat.setOnFocusChangeListener { _, hasFocus ->
+                if (hasFocus) {
+                    /*Log.d("test200","hasFocus")*/
+                    // 사이즈를 확장
+                    expandBottomSheetSize()
+                }else{
+                    // 포커스를 풀면 사이즈를 축소
+                    customSheetSize(dialog as BottomSheetDialog)
+                }
+            }
+        }
     }
 
     // 댓글 작성 완료 처리 메서드
@@ -79,9 +91,9 @@ class BottomSheetBoardReadChatFragment(val boardReadFragment: BoardReadFragment)
                     ReplyService.addBoardReplyData(replyModel)
                 }
                 val documentId = work1.await()
-                boardActivity.hideSoftInput()
-                reduceBottomSheetSize()
 
+                // 키보드를 내리고, 포커스를 푼다, 포커스를 풀면 바텀시트 사이즈를 줄이는 메서드 실행되기 때문
+                hideKeyboardAndClearFocus()
             }
         }
 
@@ -100,17 +112,16 @@ class BottomSheetBoardReadChatFragment(val boardReadFragment: BoardReadFragment)
             recyclerViewBoardChat.addItemDecoration(deco)
         }
     }
-    // 바텀시트 사이즈 조절
+    // 바텀시트 사이즈를 2/3 크기로 조절하여, 입력텍스트와 리사이클러뷰를 볼수있게 레이아웃을 짠다
     fun customSheetSize(dialog : BottomSheetDialog) {
         // BottomSheetDialog 내부에서 실제 바텀시트 뷰를 ID를 통해 찾아냅니다.
         val bottomSheet = dialog.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)
 
-
         // bottomSheet가 null이 아닌 경우에만 실행되는 블록
         bottomSheet?.apply {
-
+/*
             // bottomSheet와 연결된 BottomSheetBehavior를 가져옵니다.
-            val behavior = BottomSheetBehavior.from(bottomSheet)
+            val behavior = BottomSheetBehavior.from(bottomSheet)*/
 
             // 화면의 전체 높이를 가져옵니다.
             val displayMetrics = resources.displayMetrics
@@ -132,28 +143,34 @@ class BottomSheetBoardReadChatFragment(val boardReadFragment: BoardReadFragment)
         Log.d("test200", "increase")
         dialog?.let {
             val bottomSheet = it.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)
-                // BottomSheetBehavior와 연결
+
+            // 화면의 전체 높이를 가져옵니다.
+            val displayMetrics = resources.displayMetrics
+            val screenHeight = displayMetrics.heightPixels // 화면 높이를 픽셀 단위로 가져옵니다.
+
+            // 바텀시트의 높이를 전체 화면 크기로 고정합니다.
+            bottomSheet.layoutParams.height = screenHeight // 바텀시트의 레이아웃 높이를 설정합니다.
+            bottomSheet.requestLayout() // 레이아웃 변경 사항을 적용합니다.
+
+   /*         // BottomSheetBehavior와 연결
                 val behavior = BottomSheetBehavior.from(bottomSheet)
                 // BottomSheetBehavior 상태를 확장으로 설정
-                behavior.state = BottomSheetBehavior.STATE_EXPANDED
+                behavior.state = BottomSheetBehavior.STATE_EXPANDED*/
         }
     }
 
-    // 바텀시트 펼치기
-    private fun reduceBottomSheetSize() {
-        Log.d("test200", "reduce")
-        dialog?.let {
-            val bottomSheet = it.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)
-            // BottomSheetBehavior와 연결
-            val behavior = BottomSheetBehavior.from(bottomSheet)
-            // BottomSheetBehavior 상태를 확장으로 설정
-            behavior.state = BottomSheetBehavior.STATE_COLLAPSED
+    // 바텀시트에서 boardActivity의 hideKeyboard메서드가 안먹어 직접 만들어 실행
+    fun hideKeyboardAndClearFocus() {
+        fragmentBottomSheetBoardReadChatBinding.apply {
+            // 키보드 숨기기
+            val inputMethodManager = activity?.getSystemService(InputMethodManager::class.java)
+            inputMethodManager?.hideSoftInputFromWindow(
+                editTextCommentBottomSheetBoardReadChat.windowToken, 0
+            )
+            // 포커스 해제
+            editTextCommentBottomSheetBoardReadChat.clearFocus()
         }
     }
-
-
-
-
 
 
     // RecyclerView의 어뎁터
