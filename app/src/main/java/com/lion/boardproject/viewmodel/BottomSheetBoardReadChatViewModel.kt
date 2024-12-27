@@ -14,7 +14,6 @@ class BottomSheetBoardReadChatViewModel(val bottomSheetBoardReadChatFragment: Bo
 
         bottomSheetBoardReadChatFragment.proBoardWriteSubmit()
         editTextCommentBottomSheetBoardReadChat.value=""
-        bottomSheetBoardReadChatFragment.refreshBottomSheetRecyclerView()
     }
 }
 

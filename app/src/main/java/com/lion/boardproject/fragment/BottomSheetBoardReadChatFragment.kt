@@ -80,7 +80,7 @@ class BottomSheetBoardReadChatFragment(val boardReadFragment: BoardReadFragment)
         // 리스트 세팅
         refreshBottomSheetRecyclerView()
         // 엔터키 리스너
-        settingEditTextDoneAction()
+        // ㅂㅈsettingEditTextDoneAction()
         return fragmentBottomSheetBoardReadChatBinding.root
 
     }
@@ -155,11 +155,35 @@ class BottomSheetBoardReadChatFragment(val boardReadFragment: BoardReadFragment)
                 }
                 val documentId = work1.await()
 
+
                 // 키보드를 내리고, 포커스를 푼다, 포커스를 풀면 바텀시트 사이즈를 줄이는 메서드 실행되기 때문
                 hideKeyboardAndClearFocus()
+
             }
+            refreshBottomSheetRecyclerView()
         }
     }
+
+/*
+    // 키보드 확인 버튼
+    // 문자열을 비우는게 애매해서 구현 하지 않음
+    fun settingEditTextDoneAction() {
+        val editText = fragmentBottomSheetBoardReadChatBinding.editTextCommentBottomSheetBoardReadChat
+
+        editText.setOnEditorActionListener { v, actionId, event ->
+            // 'Done' 버튼이 눌렸을 때 actionId가 IME_ACTION_DONE인지를 확인
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+
+                proBoardWriteSubmit()
+                fragmentBottomSheetBoardReadChatBinding.editTextCommentBottomSheetBoardReadChat
+
+                true  // 리스너가 이벤트를 처리했음을 반환
+            }
+            false
+        }
+    }
+*/
+
 
 
     // 댓글 삭제 메서드
@@ -271,21 +295,6 @@ class BottomSheetBoardReadChatFragment(val boardReadFragment: BoardReadFragment)
         })
     }
 
-    // 키보드 확인 버튼
-    fun settingEditTextDoneAction() {
-        val editText = fragmentBottomSheetBoardReadChatBinding.editTextCommentBottomSheetBoardReadChat
-
-        editText.setOnEditorActionListener { v, actionId, event ->
-            // 'Done' 버튼이 눌렸을 때 actionId가 IME_ACTION_DONE인지를 확인
-            if (actionId == EditorInfo.IME_ACTION_DONE) {
-
-                proBoardWriteSubmit()
-
-                true  // 리스너가 이벤트를 처리했음을 반환
-            }
-            false
-        }
-    }
 
 
     // RecyclerView의 어뎁터

@@ -59,7 +59,8 @@
                     android:singleLine="false"
                     android:maxLines="3"
                     android:minLines="1"
-                    android:text="@={bottomSheetBoardReadChatViewModel.editTextCommentBottomSheetBoardReadChat}" />
+                    android:text="@={bottomSheetBoardReadChatViewModel.editTextCommentBottomSheetBoardReadChat}"
+                    />
             </com.google.android.material.textfield.TextInputLayout>
 
             <!-- Submit Button for Comment -->
