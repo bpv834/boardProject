@@ -58,4 +58,5 @@ dependencies {
     implementation("com.google.firebase:firebase-storage:21.0.1")
     implementation("com.github.bumptech.glide:glide:4.16.0")
     implementation("com.google.android.material:material:1.9.0")
+    implementation("net.yslibrary.keyboardvisibilityevent:keyboardvisibilityevent:3.0.0-RC2")
 }

@@ -6,7 +6,9 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
+import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -19,9 +21,7 @@ import com.lion.boardproject.R
 import com.lion.boardproject.databinding.FragmentBottomSheetBoardReadChatBinding
 import com.lion.boardproject.databinding.RowChatBinding
 import com.lion.boardproject.model.ReplyModel
-import com.lion.boardproject.service.BoardService
 import com.lion.boardproject.service.ReplyService
-import com.lion.boardproject.service.UserService
 import com.lion.boardproject.util.ReplyState
 import com.lion.boardproject.viewmodel.BottomSheetBoardReadChatViewModel
 import com.lion.boardproject.viewmodel.RowChatViewModel
@@ -29,6 +29,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
+import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
+import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEventListener
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -43,6 +45,7 @@ class BottomSheetBoardReadChatFragment(val boardReadFragment: BoardReadFragment)
         super.onStart() // 부모 클래스의 onStart()를 호출하여 정상적인 라이프사이클 동작을 보장합니다.
         // 현재 다이얼로그를 BottomSheetDialog로 캐스팅합니다.
         customSheetSize(dialog as BottomSheetDialog)
+        whenDownKeyBoard()
     }
 
     lateinit var boardActivity: BoardActivity
@@ -76,6 +79,8 @@ class BottomSheetBoardReadChatFragment(val boardReadFragment: BoardReadFragment)
         settingRecyclerView()
         // 리스트 세팅
         refreshBottomSheetRecyclerView()
+        // 엔터키 리스너
+        settingEditTextDoneAction()
         return fragmentBottomSheetBoardReadChatBinding.root
 
     }
@@ -114,12 +119,25 @@ class BottomSheetBoardReadChatFragment(val boardReadFragment: BoardReadFragment)
         }
     }
 
+    // 포커스 풀기
+    fun clearEditTextFocus() {
+        val editText =
+            fragmentBottomSheetBoardReadChatBinding.editTextCommentBottomSheetBoardReadChat
+        editText.clearFocus()
+    }
+
     // 댓글 작성 완료 처리 메서드
     fun proBoardWriteSubmit() {
         fragmentBottomSheetBoardReadChatBinding.apply {
 
             val comment =
                 bottomSheetBoardReadChatViewModel?.editTextCommentBottomSheetBoardReadChat?.value!!
+
+            if (comment.isEmpty()) {
+                boardActivity.showMessageDialog("오류","댓글을 입력해주세요","확인"){
+                }
+                return
+            }
 
             CoroutineScope(Dispatchers.Main).launch {
 
@@ -144,30 +162,10 @@ class BottomSheetBoardReadChatFragment(val boardReadFragment: BoardReadFragment)
     }
 
 
-/*    // 글 삭제 처리 메서드
-    fun proBoardDelete(){
-        CoroutineScope(Dispatchers.Main).launch {
-            // 만약 첨부 이미지가 있다면 삭제한다.
-            if(boardModel.boardFileName != "none"){
-                val work1 = async(Dispatchers.IO){
-                    BoardService.removeImageFile(boardModel.boardFileName)
-                }
-                work1.join()
-            }
-            // 글 정보를 삭제한다.
-            val work2 = async(Dispatchers.IO){
-                BoardService.deleteBoardData(boardDocumentId)
-            }
-            work2.join()
-            // 글 목록 화면으로 이동한다.
-            boardMainFragment.removeFragment(BoardSubFragmentName.BOARD_READ_FRAGMENT)
-        }
-    }*/
-
     // 댓글 삭제 메서드
     fun deleteReplyData(boardId: String, replyDocId: String) {
         CoroutineScope(Dispatchers.Main).launch {
-            Log.d("test300","coroution")
+            Log.d("test300", "coroution")
             val work1 = async(Dispatchers.IO) {
                 ReplyService.deleteBoardReplyData(boardId, replyDocId)
             }
@@ -251,6 +249,41 @@ class BottomSheetBoardReadChatFragment(val boardReadFragment: BoardReadFragment)
             )
             // 포커스 해제
             editTextCommentBottomSheetBoardReadChat.clearFocus()
+        }
+    }
+
+    // 키보드가 내려갔을 때 반응 하는 리스너,
+    // implementation("net.yslibrary.keyboardvisibilityevent:keyboardvisibilityevent:3.0.0-RC2") 키보드 내렸을때 반응하는 리스너 의존성
+    // import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
+    // import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEventListener
+    fun whenDownKeyBoard() {
+        // 키보드 가시성 이벤트 리스너 설정
+        KeyboardVisibilityEvent.setEventListener(boardActivity, object :
+            KeyboardVisibilityEventListener {
+            override fun onVisibilityChanged(isOpen: Boolean) {
+                if (!isOpen) {
+                    // 키보드가 닫힐 때 동작
+                    // 에딧 텍스트 포커스 clear하기,
+                    // 포커스가 풀리면, 바텀시트를 조절하기 때문,ㅂㅈ
+                    clearEditTextFocus()
+                }
+            }
+        })
+    }
+
+    // 키보드 확인 버튼
+    fun settingEditTextDoneAction() {
+        val editText = fragmentBottomSheetBoardReadChatBinding.editTextCommentBottomSheetBoardReadChat
+
+        editText.setOnEditorActionListener { v, actionId, event ->
+            // 'Done' 버튼이 눌렸을 때 actionId가 IME_ACTION_DONE인지를 확인
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+
+                proBoardWriteSubmit()
+
+                true  // 리스너가 이벤트를 처리했음을 반환
+            }
+            false
         }
     }
 

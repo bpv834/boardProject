@@ -67,9 +67,6 @@ class ReplyRepository {
             Log.d("test300","repository, replyDocId  : ${replyDocument.id}")
 
             replyDocument.delete().await()
-
         }
-
-
     }
 }
