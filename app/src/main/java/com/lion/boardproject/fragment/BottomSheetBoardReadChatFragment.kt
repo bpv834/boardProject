@@ -12,6 +12,7 @@ import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.divider.MaterialDividerItemDecoration
@@ -40,12 +41,17 @@ class BottomSheetBoardReadChatFragment(val boardReadFragment: BoardReadFragment)
     // 메인 RecyclerView를 구성하기 위해 사용할 리스트
     var recyclerViewList = mutableListOf<ReplyModel>()
 
-    // 바텀시트 사이즈 조절
+
     override fun onStart() {
-        super.onStart() // 부모 클래스의 onStart()를 호출하여 정상적인 라이프사이클 동작을 보장합니다.
-        // 현재 다이얼로그를 BottomSheetDialog로 캐스팅합니다.
-        customSheetSize(dialog as BottomSheetDialog)
-        whenDownKeyBoard()
+        super.onStart()
+        // dialog가 null이 아니고 BottomSheetDialog 타입인지 확인
+        val bottomSheetDialog = dialog as? BottomSheetDialog
+        if (bottomSheetDialog != null) {
+            customSheetSize(bottomSheetDialog)
+            whenDownKeyBoard()
+        } else {
+            Log.e("BottomSheetError", "Dialog is null or not a BottomSheetDialog")
+        }
     }
 
     lateinit var boardActivity: BoardActivity
@@ -110,7 +116,7 @@ class BottomSheetBoardReadChatFragment(val boardReadFragment: BoardReadFragment)
                 if (hasFocus) {
                     /*Log.d("test200","hasFocus")*/
                     // 사이즈를 확장
-                    expandBottomSheetSize()
+                 /*   expandBottomSheetSize()*/
                 } else {
                     // 포커스를 풀면 사이즈를 축소
                     customSheetSize(dialog as BottomSheetDialog)
@@ -121,9 +127,10 @@ class BottomSheetBoardReadChatFragment(val boardReadFragment: BoardReadFragment)
 
     // 포커스 풀기
     fun clearEditTextFocus() {
-        val editText =
-            fragmentBottomSheetBoardReadChatBinding.editTextCommentBottomSheetBoardReadChat
-        editText.clearFocus()
+        if (dialog?.isShowing == true){
+            clearEditTextFocus()
+        }
+
     }
 
     // 댓글 작성 완료 처리 메서드
@@ -256,12 +263,27 @@ class BottomSheetBoardReadChatFragment(val boardReadFragment: BoardReadFragment)
             bottomSheet.layoutParams.height = screenHeight // 바텀시트의 레이아웃 높이를 설정합니다.
             bottomSheet.requestLayout() // 레이아웃 변경 사항을 적용합니다.
 
-            /*         // BottomSheetBehavior와 연결
-                         val behavior = BottomSheetBehavior.from(bottomSheet)
-                         // BottomSheetBehavior 상태를 확장으로 설정
-                         behavior.state = BottomSheetBehavior.STATE_EXPANDED*/
+            // BottomSheetBehavior와 연결
+            val behavior = BottomSheetBehavior.from(bottomSheet)
+            // BottomSheetBehavior 상태를 확장으로 설정
+            behavior.state = BottomSheetBehavior.STATE_EXPANDED
+
+            // 상태 변경 시 충돌 방지: 확장된 상태에서만 유지
+            behavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
+                override fun onStateChanged(bottomSheet: View, newState: Int) {
+                    // 확장 상태 유지
+                    if (newState != BottomSheetBehavior.STATE_EXPANDED) {
+                        behavior.state = BottomSheetBehavior.STATE_EXPANDED
+                    }
+                }
+
+                override fun onSlide(bottomSheet: View, slideOffset: Float) {
+                    // 슬라이드 중 추가 동작이 필요하면 구현 가능
+                }
+            })
         }
     }
+
 
     // 바텀시트에서 boardActivity의 hideKeyboard메서드가 안먹어 직접 만들어 실행
     fun hideKeyboardAndClearFocus() {
